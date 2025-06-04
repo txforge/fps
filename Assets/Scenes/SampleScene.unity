@@ -886,8 +886,9 @@ GameObject:
   m_Component:
   - component: {fileID: 1985039863}
   - component: {fileID: 1985039865}
-  - component: {fileID: 1985039864}
   - component: {fileID: 1985039866}
+  - component: {fileID: 1985039864}
+  - component: {fileID: 1985039867}
   m_Layer: 0
   m_Name: Character
   m_TagString: Untagged
@@ -927,7 +928,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   speed: 6
   gravity: -9.81
-  jumpHeight: 1.5
   groundDistance: 1.1
   groundMask:
     serializedVersion: 2
@@ -936,6 +936,9 @@ MonoBehaviour:
   deceleration: 25
   isGrounded: 0
   groundCheck: {fileID: 1780756249}
+  jumpHeight: 1.5
+  maxJumpCount: 1
+  jumpBufferTimer: {fileID: 1985039867}
 --- !u!54 &1985039865
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -986,6 +989,21 @@ CapsuleCollider:
   m_Height: 2
   m_Direction: 1
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &1985039867
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1985039862}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6ec8734715f383e47bc2ef89c12cdb50, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  timerName: JumpBuffer
+  loop: 0
+  duration: 5
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

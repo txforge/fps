@@ -5,7 +5,6 @@ public class character_movement : MonoBehaviour
 {
 	public float speed = 6f;
 	public float gravity = -9.81f;
-	public float jumpHeight = 1.5f;
 	public float groundDistance = 0.6f;
 	public LayerMask groundMask;
 	public float acceleration = 20f;
@@ -17,24 +16,29 @@ public class character_movement : MonoBehaviour
 
 	public Transform groundCheck; // Assegna in Inspector
 
+    [Header("JUMP")]
+	public float jumpHeight = 1.5f;
+	public int maxJumpCount; // Numero di salti consentiti
+	private int jumpCount = 0; // Contatore dei salti effettuati
+	private float jumpBufferTime = 0.2f; // Tempo di buffer per il salto
+	public Timer jumpBufferTimer;
+
+	private bool wasGrounded = false; // aggiungi questa variabile
+
 
 	void Start()
 	{
 		rb = GetComponent<Rigidbody>();
 		rb.freezeRotation = true;
+
+		jumpBufferTimer.duration = jumpBufferTime;
 	}
 
 	void Update()
 	{
-		RaycastHit hitSphere;
-		isGrounded = Physics.SphereCast(
-			transform.position,
-			0.5f, // Raggio della sfera
-			Vector3.down,
-			out hitSphere,
-			groundDistance,
-			groundMask
-		); 
+		// Transizione aria→terra: resetta i salti
+		if (isGrounded && !wasGrounded)
+			jumpCount = 0;
 
 		float x = Input.GetAxis("Horizontal");
 		float z = Input.GetAxis("Vertical");
@@ -62,10 +66,31 @@ public class character_movement : MonoBehaviour
 
 		rb.linearVelocity = new Vector3(velocityChange.x, velocity.y, velocityChange.z);
 
-		if (Input.GetButtonDown("Jump") && isGrounded)
+		// Input salto: attiva buffer
+		if (Input.GetButtonDown("Jump"))
+			jumpBufferTimer.StartTimer();
+
+		// Salto da buffer SOLO se atterri mentre il buffer è attivo
+		if (isGrounded && jumpBufferTimer.IsRunning())
 		{
-			rb.linearVelocity = new Vector3(rb.linearVelocity.x, Mathf.Sqrt(jumpHeight * -2f * gravity), rb.linearVelocity.z);
+			if (jumpCount < maxJumpCount)
+			{
+				Jump();
+				jumpBufferTimer.StopTimer();
+			}
 		}
+		// Doppio/triplo salto in aria SOLO se premi il tasto
+		else if (!isGrounded && Input.GetButtonDown("Jump") && jumpCount < maxJumpCount)
+		{
+			Jump();
+		}
+
+		wasGrounded = isGrounded;
+	}
+	void Jump()
+	{
+		rb.linearVelocity = new Vector3(rb.linearVelocity.x, Mathf.Sqrt(jumpHeight * -2f * gravity), rb.linearVelocity.z);
+		jumpCount++;
 	}
 	void FixedUpdate()
 	{
@@ -74,4 +99,20 @@ public class character_movement : MonoBehaviour
 			rb.AddForce(Vector3.up * gravity, ForceMode.Acceleration);
 		}
 	}
+
+	private void OnCollisionEnter(Collision collision)
+{
+    if ((groundMask.value & (1 << collision.gameObject.layer)) != 0)
+    {
+        isGrounded = true;
+    }
+}
+
+private void OnCollisionExit(Collision collision)
+{
+    if ((groundMask.value & (1 << collision.gameObject.layer)) != 0)
+    {
+        isGrounded = false;
+    }
+}
 }
