@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections; // <--- aggiungi questa riga
 
 [RequireComponent(typeof(Rigidbody))]
 public class character_movement : MonoBehaviour
@@ -21,8 +22,6 @@ public class character_movement : MonoBehaviour
 	public int maxJumpCount; // Numero di salti consentiti
 	private int jumpCount = 0; // Contatore dei salti effettuati
 	private float jumpBufferTime = 0.2f; // Tempo di buffer per il salto
-	public Timer jumpBufferTimer;
-
 	private bool wasGrounded = false; // aggiungi questa variabile
 
 
@@ -30,8 +29,6 @@ public class character_movement : MonoBehaviour
 	{
 		rb = GetComponent<Rigidbody>();
 		rb.freezeRotation = true;
-
-		jumpBufferTimer.duration = jumpBufferTime;
 	}
 
 	void Update()
@@ -68,15 +65,15 @@ public class character_movement : MonoBehaviour
 
 		// Input salto: attiva buffer
 		if (Input.GetButtonDown("Jump"))
-			jumpBufferTimer.StartTimer();
+			StartCoroutine(JumpBufferCoroutine());
 
 		// Salto da buffer SOLO se atterri mentre il buffer è attivo
-		if (isGrounded && jumpBufferTimer.IsRunning())
+		if (isGrounded && jumpBufferActive)
 		{
 			if (jumpCount < maxJumpCount)
 			{
 				Jump();
-				jumpBufferTimer.StopTimer();
+				jumpBufferActive = false;
 			}
 		}
 		// Doppio/triplo salto in aria SOLO se premi il tasto
@@ -87,6 +84,15 @@ public class character_movement : MonoBehaviour
 
 		wasGrounded = isGrounded;
 	}
+
+	private bool jumpBufferActive = false;
+	IEnumerator JumpBufferCoroutine()
+	{
+		jumpBufferActive = true;
+		yield return new WaitForSeconds(jumpBufferTime);
+		jumpBufferActive = false;
+	}
+
 	void Jump()
 	{
 		rb.linearVelocity = new Vector3(rb.linearVelocity.x, Mathf.Sqrt(jumpHeight * -2f * gravity), rb.linearVelocity.z);
