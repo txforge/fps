@@ -312,6 +312,18 @@ PrefabInstance:
       propertyPath: m_TagString
       value: MainWeapon
       objectReference: {fileID: 0}
+    - target: {fileID: 2817145673595678228, guid: 709cc77706debb14695388d00c5e52cb, type: 3}
+      propertyPath: IsLaser
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2817145673595678228, guid: 709cc77706debb14695388d00c5e52cb, type: 3}
+      propertyPath: max_ammo
+      value: 15
+      objectReference: {fileID: 0}
+    - target: {fileID: 2817145673595678228, guid: 709cc77706debb14695388d00c5e52cb, type: 3}
+      propertyPath: laser_range
+      value: 10
+      objectReference: {fileID: 0}
     - target: {fileID: 7492356828381099433, guid: 709cc77706debb14695388d00c5e52cb, type: 3}
       propertyPath: m_LocalPosition.x
       value: -0.053
