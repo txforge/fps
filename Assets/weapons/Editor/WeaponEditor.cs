@@ -2,6 +2,7 @@
 using UnityEditor;
 using UnityEngine;
 
+#region BurstEditor
 [CanEditMultipleObjects]
 [CustomEditor(typeof(Burst))]
 public class WeaponEditor : Editor
@@ -21,8 +22,6 @@ public class WeaponEditor : Editor
         Tab = GUILayout.Toolbar(Tab, tabs);
 
         // Ordine: Weapon Info, Damage, Fire Rate, Components
-        SerializedProperty IsLaser = serializedObject.FindProperty("IsLaser");
-        SerializedProperty laser_range = serializedObject.FindProperty("laser_range");
         SerializedProperty has_ammo = serializedObject.FindProperty("has_ammo");
         SerializedProperty max_ammo = serializedObject.FindProperty("max_ammo");
         SerializedProperty ammo = serializedObject.FindProperty("ammo");
@@ -45,11 +44,6 @@ public class WeaponEditor : Editor
         switch (Tab)
         {
             case 0: // Weapon Info
-                EditorGUILayout.PropertyField(IsLaser);
-                if (IsLaser.boolValue)
-                {
-                    EditorGUILayout.PropertyField(laser_range);
-                }
                 EditorGUILayout.PropertyField(has_ammo);
                 if (!has_ammo.hasMultipleDifferentValues && has_ammo.boolValue)
                 {
@@ -75,23 +69,16 @@ public class WeaponEditor : Editor
                 EditorGUILayout.PropertyField(nuzzle); // ora mostra il campo corretto
                 break;
             case 4: // VFX
-                // Mostra i campi bulletTrailPrefab e bulletTrailSpeed solo se non è laser
-                if (!IsLaser.boolValue)
-                {
-                    EditorGUILayout.PropertyField(bulletTrailPrefab);
-                    EditorGUILayout.PropertyField(bulletTrailSpeed);
-                }
-                else
-                {
-                    EditorGUILayout.HelpBox("Bullet Trail is disabled for Laser weapons.", MessageType.Info);
-                }
+                EditorGUILayout.PropertyField(bulletTrailPrefab);
+                EditorGUILayout.PropertyField(bulletTrailSpeed);
                 break;
         }
 
         serializedObject.ApplyModifiedProperties();
     }
 }
-
+#endregion
+#region FullautoEditor
 [CanEditMultipleObjects]
 [CustomEditor(typeof(Fullauto))]
 public class FullautoEditor : Editor
@@ -126,6 +113,7 @@ public class FullautoEditor : Editor
         SerializedProperty nuzzle = serializedObject.FindProperty("nuzzle_point"); // CORRETTO: il campo si chiama nuzzle_point nelle armi, non "nuzzle"
         SerializedProperty bulletTrailPrefab = serializedObject.FindProperty("bulletTrailPrefab");
         SerializedProperty bulletTrailSpeed = serializedObject.FindProperty("bulletTrailSpeed");
+        SerializedProperty laserLinePrefab = serializedObject.FindProperty("laserLinePrefab");
 
         GUILayout.Space(10);
 
@@ -170,6 +158,7 @@ public class FullautoEditor : Editor
                 else
                 {
                     EditorGUILayout.HelpBox("Bullet Trail is disabled for Laser weapons.", MessageType.Info);
+                    EditorGUILayout.PropertyField(laserLinePrefab);
                 }
                 break;
         }
@@ -177,7 +166,8 @@ public class FullautoEditor : Editor
         serializedObject.ApplyModifiedProperties();
     }
 }
-
+#endregion
+#region SemiautoEditor
 [CanEditMultipleObjects]
 [CustomEditor(typeof(Semiauto))]
 public class SemiautoEditor : Editor
@@ -196,8 +186,6 @@ public class SemiautoEditor : Editor
 
         Tab = GUILayout.Toolbar(Tab, tabs);
 
-        SerializedProperty IsLaser = serializedObject.FindProperty("IsLaser");
-        SerializedProperty laser_range = serializedObject.FindProperty("laser_range");
         SerializedProperty has_ammo = serializedObject.FindProperty("has_ammo");
         SerializedProperty max_ammo = serializedObject.FindProperty("max_ammo");
         SerializedProperty ammo = serializedObject.FindProperty("ammo");
@@ -212,17 +200,13 @@ public class SemiautoEditor : Editor
         SerializedProperty nuzzle = serializedObject.FindProperty("nuzzle_point"); // CORRETTO: il campo si chiama nuzzle_point nelle armi, non "nuzzle"
         SerializedProperty bulletTrailPrefab = serializedObject.FindProperty("bulletTrailPrefab");
         SerializedProperty bulletTrailSpeed = serializedObject.FindProperty("bulletTrailSpeed");
+        SerializedProperty nuzzle_flash_prefab = serializedObject.FindProperty("nuzzle_flash_prefab");
 
         GUILayout.Space(10);
 
         switch (Tab)
         {
             case 0: // Weapon Info
-                EditorGUILayout.PropertyField(IsLaser);
-                if (IsLaser.boolValue)
-                {
-                    EditorGUILayout.PropertyField(laser_range);
-                }
                 EditorGUILayout.PropertyField(has_ammo);
                 if (!has_ammo.hasMultipleDifferentValues && has_ammo.boolValue)
                 {
@@ -247,20 +231,15 @@ public class SemiautoEditor : Editor
                 EditorGUILayout.PropertyField(nuzzle); // ora mostra il campo corretto
                 break;
             case 4: // VFX
-                // Mostra i campi bulletTrailPrefab e bulletTrailSpeed solo se non è laser
-                if (!IsLaser.boolValue)
-                {
-                    EditorGUILayout.PropertyField(bulletTrailPrefab);
-                    EditorGUILayout.PropertyField(bulletTrailSpeed);
-                }
-                else
-                {
-                    EditorGUILayout.HelpBox("Bullet Trail is disabled for Laser weapons.", MessageType.Info);
-                }
+                EditorGUILayout.PropertyField(bulletTrailPrefab);
+                EditorGUILayout.PropertyField(bulletTrailSpeed);
+
+                EditorGUILayout.PropertyField(nuzzle_flash_prefab);
                 break;
         }
 
         serializedObject.ApplyModifiedProperties();
     }
 }
+#endregion
 #endif

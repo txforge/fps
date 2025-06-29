@@ -16,7 +16,7 @@ GameObject:
   - component: {fileID: 729360475104361574}
   m_Layer: 0
   m_Name: Cube burst
-  m_TagString: Untagged
+  m_TagString: MainWeapon
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -155,10 +155,12 @@ MonoBehaviour:
   anim: {fileID: 0}
   ui: {fileID: 0}
   nuzzle_point: {fileID: 0}
+  nuzzle_flash_prefab: {fileID: 0}
   IsLaser: 0
   laser_range: 1
   bulletTrailPrefab: {fileID: 8687716285194166502, guid: ec805ba2fe588804f96fe26581bb569e, type: 3}
   bulletTrailSpeed: 200
+  laserLinePrefab: {fileID: 0}
   Nofbursts: 3
   time_between_bullet: 0.1
   burst_cooldown: 0.5

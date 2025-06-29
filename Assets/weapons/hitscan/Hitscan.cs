@@ -4,6 +4,7 @@ using System.Collections;
 public class Hitscan : Weapon
 {
     public Transform nuzzle_point;
+    public GameObject nuzzle_flash_prefab;
     public bool IsLaser = false;
     public float laser_range = 1f; // Default range for laser weapons
 
@@ -11,6 +12,8 @@ public class Hitscan : Weapon
     public TrailRenderer bulletTrailPrefab; // Assign in inspector
     public float bulletTrailSpeed = 300f; // Units per second
 
+    public LineRenderer laserLinePrefab; // Assegna in inspector per il laser
+    private LineRenderer activeLaserLine;
     private bool isReloading = false;
 
     // Metodo principale per gestire il raycast
@@ -90,7 +93,6 @@ public class Hitscan : Weapon
             return;
         }
         Camera cam = Camera.main;
-        // Calcola la direzione dal nuzzle verso il punto che la camera sta guardando (centro schermo)
         Ray ray = cam.ScreenPointToRay(new Vector3(Screen.width / 2, Screen.height / 2, 0));
         RaycastHit hitInfo;
         Vector3 targetPoint;
@@ -123,7 +125,6 @@ public class Hitscan : Weapon
         RaycastHit hitInfo;
         Vector3 targetPoint;
 
-        // Fai un raycast dalla camera per trovare il punto di impatto reale (es. muro, nemico)
         if (Physics.Raycast(ray, out hitInfo, range))
             targetPoint = hitInfo.point;
         else
@@ -133,10 +134,23 @@ public class Hitscan : Weapon
 
         Debug.DrawRay(nuzzle_point.position, direction * range, Color.red, 1.5f);
 
+        // Se è laser, crea il LineRenderer solo se non esiste, e attivalo (ma NON aggiorna qui la posizione)
+        if (IsLaser && laserLinePrefab != null)
+        {
+            if (activeLaserLine == null)
+            {
+                activeLaserLine = Instantiate(laserLinePrefab, nuzzle_point.position, Quaternion.identity, nuzzle_point);
+            }
+            activeLaserLine.gameObject.SetActive(true);
+            _laserActive = true;
+        }
+
         PerformRaycast(nuzzle_point.position, direction, range);
         ConsumeAmmo();
         UpdateAmmoLabel();
     }
+
+    private bool _laserActive = false;
 
     protected virtual void Update()
     {
@@ -144,6 +158,42 @@ public class Hitscan : Weapon
         {
             Reload();
         }
+
+        // Aggiorna la posizione del laser ogni frame SOLO se il laser è attivo (cioè si sta sparando)
+        if (IsLaser && activeLaserLine != null && nuzzle_point != null && _laserActive)
+        {
+            Camera cam = Camera.main;
+            Ray ray = cam.ScreenPointToRay(new Vector3(Screen.width / 2, Screen.height / 2, 0));
+            RaycastHit hitInfo;
+            Vector3 targetPoint;
+            float range = laser_range;
+
+            // Calcola la direzione dal nuzzle verso il punto mirato dal centro schermo
+            Vector3 cameraTarget;
+            if (Physics.Raycast(ray, out hitInfo, range))
+                cameraTarget = hitInfo.point;
+            else
+                cameraTarget = ray.origin + ray.direction.normalized * range;
+
+            Vector3 direction = (cameraTarget - nuzzle_point.position).normalized;
+            Ray nuzzleRay = new Ray(nuzzle_point.position, direction);
+            if (Physics.Raycast(nuzzleRay, out hitInfo, range))
+                targetPoint = hitInfo.point;
+            else
+                targetPoint = nuzzle_point.position + direction * range;
+
+            activeLaserLine.SetPosition(0, nuzzle_point.position);
+            activeLaserLine.SetPosition(1, targetPoint);
+        }
+        else if (activeLaserLine != null)
+        {
+            // Se non sto sparando, nascondi il laser
+            activeLaserLine.gameObject.SetActive(false);
+        }
+
+        // Reset flag per il prossimo frame SOLO se non si sta tenendo premuto Fire1
+        if (!Input.GetButton("Fire1"))
+            _laserActive = false;
     }
 
     public override void Reload()
@@ -184,6 +234,13 @@ public class Hitscan : Weapon
             UIammo.text = $"{ammo} / {max_ammo}";
         else
             UIammo.text = "∞";
+    }
+
+    // Nascondi il laser quando smetti di sparare (da chiamare da Fullauto/Semiauto/Burst quando serve)
+    public void HideLaser()
+    {
+        if (activeLaserLine != null)
+            activeLaserLine.gameObject.SetActive(false);
     }
 }
 
