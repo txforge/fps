@@ -3,18 +3,17 @@ using UnityEngine.UIElements;
 
 public class CharacterInfo : MonoBehaviour
 {
-    public Weapon weapon; // Solo quella con tag "MainWeapon"
+    public Weapon weapon; // Only the one with tag "MainWeapon"
     public Animator weapon_anim;
-
-    
 
     private void Awake()
     {
         SetUpWeapon();
     }
+
     private void SetUpWeapon()
     {
-        // Trova tutte le armi nei figli e nei figli dei figli (ricorsivo)
+        // Find all weapons in children and grandchildren (recursive)
         weapon = null;
         Weapon[] allWeapons = GetComponentsInChildren<Weapon>(true);
         foreach (Weapon w in allWeapons)
@@ -28,7 +27,7 @@ public class CharacterInfo : MonoBehaviour
 
         if (weapon == null)
         {
-            Debug.LogError("Arma con tag 'MainWeapon' non trovata! Assicurati di assegnare il tag.");
+            Debug.LogError("Weapon with tag 'MainWeapon' not found! Make sure to assign the tag.");
         }
         else
         {

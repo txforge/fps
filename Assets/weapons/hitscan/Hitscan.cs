@@ -12,14 +12,13 @@ public class Hitscan : Weapon
     public TrailRenderer bulletTrailPrefab; // Assign in inspector
     public float bulletTrailSpeed = 300f; // Units per second
 
-    public LineRenderer laserLinePrefab; // Assegna in inspector per il laser
+    public LineRenderer laserLinePrefab; // Assign in inspector for laser
     private LineRenderer activeLaserLine;
     private bool isReloading = false;
 
-    // Metodo principale per gestire il raycast
+    // Main method for handling raycast
     private void PerformRaycast(Vector3 origin, Vector3 direction, float range)
     {
-        // Disegna la traiettoria del ray sempre, per debug
         Debug.DrawRay(origin, direction * range, Color.red, 1.5f);
 
         anim.SetTrigger("shoot");
@@ -32,7 +31,7 @@ public class Hitscan : Weapon
             float distance = hit.distance;
             if (dmg_has_dmg_fall_off && distance > dmg_fall_of)
             {
-                //Debug.Log("Hit (fall off): " + hit.collider.name + " at distance " + distance);
+                // Debug.Log("Hit (fall off): " + hit.collider.name + " at distance " + distance);
             }
             else
             {
@@ -44,7 +43,7 @@ public class Hitscan : Weapon
             Debug.Log("Missed");
         }
 
-        // Spawn bullet trail SOLO se non è un laser
+        // Spawn bullet trail ONLY if not a laser
         if (!IsLaser && bulletTrailPrefab != null)
         {
             TrailRenderer trail = Instantiate(bulletTrailPrefab, origin, Quaternion.identity);
@@ -83,13 +82,14 @@ public class Hitscan : Weapon
             }
         }
     }
-    // Spara dal nuzzle verso la stessa direzione della camera (come Shoot())
+
+    // Shoot from nuzzle toward the direction aimed by the camera (center screen)
     public void Shoot()
     {
         if (!CanShoot() || isReloading) return;
         if (nuzzle_point == null)
         {
-            Debug.LogWarning("nuzzle_point non assegnato!");
+            Debug.LogWarning("nuzzle_point not assigned!");
             return;
         }
         Camera cam = Camera.main;
@@ -97,7 +97,7 @@ public class Hitscan : Weapon
         RaycastHit hitInfo;
         Vector3 targetPoint;
 
-        // Fai un raycast dalla camera per trovare il punto di impatto reale (es. muro, nemico)
+        // Raycast from camera to find the real hit point (wall, enemy, etc.)
         if (Physics.Raycast(ray, out hitInfo, 1000f))
             targetPoint = hitInfo.point;
         else
@@ -117,7 +117,7 @@ public class Hitscan : Weapon
         if (!CanShoot() || isReloading) return;
         if (nuzzle_point == null)
         {
-            Debug.LogWarning("nuzzle_point non assegnato!");
+            Debug.LogWarning("nuzzle_point not assigned!");
             return;
         }
         Camera cam = Camera.main;
@@ -134,7 +134,7 @@ public class Hitscan : Weapon
 
         Debug.DrawRay(nuzzle_point.position, direction * range, Color.red, 1.5f);
 
-        // Se è laser, crea il LineRenderer solo se non esiste, e attivalo (ma NON aggiorna qui la posizione)
+        // If laser, create LineRenderer if not exists, and activate it (but do NOT update position here)
         if (IsLaser && laserLinePrefab != null)
         {
             if (activeLaserLine == null)
@@ -159,7 +159,7 @@ public class Hitscan : Weapon
             Reload();
         }
 
-        // Aggiorna la posizione del laser ogni frame SOLO se il laser è attivo (cioè si sta sparando)
+        // Update laser position every frame ONLY if laser is active (i.e., firing)
         if (IsLaser && activeLaserLine != null && nuzzle_point != null && _laserActive)
         {
             Camera cam = Camera.main;
@@ -168,15 +168,17 @@ public class Hitscan : Weapon
             Vector3 targetPoint;
             float range = laser_range;
 
-            // Calcola la direzione dal nuzzle verso il punto mirato dal centro schermo
+            // Calculate the point aimed by the camera (center screen)
             Vector3 cameraTarget;
-            if (Physics.Raycast(ray, out hitInfo, range))
+            if (Physics.Raycast(ray, out hitInfo, 1000f))
                 cameraTarget = hitInfo.point;
             else
-                cameraTarget = ray.origin + ray.direction.normalized * range;
+                cameraTarget = ray.origin + ray.direction.normalized * 1000f;
 
+            // Calculate direction from nuzzle to camera target
             Vector3 direction = (cameraTarget - nuzzle_point.position).normalized;
             Ray nuzzleRay = new Ray(nuzzle_point.position, direction);
+            // The laser stops where it hits from the nuzzle, or goes to the aimed point
             if (Physics.Raycast(nuzzleRay, out hitInfo, range))
                 targetPoint = hitInfo.point;
             else
@@ -187,11 +189,11 @@ public class Hitscan : Weapon
         }
         else if (activeLaserLine != null)
         {
-            // Se non sto sparando, nascondi il laser
+            // If not firing, hide the laser
             activeLaserLine.gameObject.SetActive(false);
         }
 
-        // Reset flag per il prossimo frame SOLO se non si sta tenendo premuto Fire1
+        // Reset flag for next frame ONLY if Fire1 is not held
         if (!Input.GetButton("Fire1"))
             _laserActive = false;
     }
@@ -205,10 +207,10 @@ public class Hitscan : Weapon
         isReloading = true;
         if (anim != null)
             anim.SetTrigger("reload");
-        // ammo e UI verranno aggiornati da un Animation Event
+        // ammo and UI will be updated by Animation Event
     }
 
-    // Da chiamare tramite Animation Event alla fine dell'animazione di reload
+    // To be called by Animation Event at the end of reload animation
     public void OnReloadAnimationEnd()
     {
         ammo = max_ammo;
@@ -220,13 +222,13 @@ public class Hitscan : Weapon
     {
         if (ui == null)
         {
-            Debug.LogWarning("UI non assegnata! Assicurati di assegnare un UIDocument per l'interfaccia utente.");
+            Debug.LogWarning("UI not assigned! Make sure to assign a UIDocument for the UI.");
             return;
         }
         var root = ui.rootVisualElement;
         if (UIammo == null)
         {
-            Debug.LogWarning("Label 'UIammo' non trovata nel UIDocument.(Script Hitscan)");
+            Debug.LogWarning("Label 'UIammo' not found in UIDocument. (Script Hitscan)");
             return;
         }
 
@@ -236,7 +238,7 @@ public class Hitscan : Weapon
             UIammo.text = "∞";
     }
 
-    // Nascondi il laser quando smetti di sparare (da chiamare da Fullauto/Semiauto/Burst quando serve)
+    // Hide the laser when you stop firing (call from Fullauto/Semiauto/Burst if needed)
     public void HideLaser()
     {
         if (activeLaserLine != null)

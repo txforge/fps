@@ -7,7 +7,7 @@ public class Fullauto : Hitscan
 
     protected override void Update()
     {
-        base.Update(); // Assicurati di chiamare il metodo Update della classe base se necessario
+        base.Update();
         if (Input.GetButtonDown("Fire1") && !isFiring)
         {
             StartCoroutine(AutoFire());

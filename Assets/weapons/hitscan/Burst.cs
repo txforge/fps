@@ -4,14 +4,14 @@ using System.Collections;
 public class Burst : Hitscan
 {
     public int Nofbursts = 3;
-    public float time_between_bullet = 0.1f; // secondi tra colpi della raffica
-    public float burst_cooldown = 0.5f;      // tempo tra una raffica e l'altra
+    public float time_between_bullet = 0.1f; // Seconds between burst shots
+    public float burst_cooldown = 0.5f;      // Time between bursts
 
     private bool isFiring = false;
 
     protected override void Update()
     {
-        base.Update(); // Assicurati di chiamare il metodo Update della classe base se necessario
+        base.Update();
         if (Input.GetButton("Fire1") && !isFiring)
         {
             StartCoroutine(BurstFire());
@@ -26,8 +26,7 @@ public class Burst : Hitscan
             if (!IsLaser) Shoot();
             else Shoot(laser_range);
 
-            // Aggiorna ammo dopo ogni colpo
-            // (già gestito in Shoot(), quindi non serve altro qui)
+            // Ammo/UI update is handled in Shoot()
 
             if (i < Nofbursts - 1)
             {
@@ -36,11 +35,9 @@ public class Burst : Hitscan
         }
         yield return new WaitForSeconds(burst_cooldown);
         isFiring = false;
-        // Aggiorna la UI delle munizioni dopo la raffica (utile se la UI non si aggiorna per qualche motivo)
-        //UpdateAmmoLabel();
     }
 
-    // AGGIUNGI IL MODIFICATORE 'new' PER SOPPRIMERE IL WARNING
+    // Makes the function callable from Animation Event (like Semiauto)
     public new void OnReloadAnimationEnd()
     {
         base.OnReloadAnimationEnd();
