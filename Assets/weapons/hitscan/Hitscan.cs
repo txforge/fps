@@ -37,6 +37,22 @@ public class Hitscan : Weapon
             {
                 Debug.Log("Hit: " + hit.collider.name + " at distance " + distance);
             }
+
+            // Try to find IDamageable on the hit object or its parents
+            var damageable = hit.collider.GetComponent<IDamageable>();
+            if (damageable == null)
+                damageable = hit.collider.GetComponentInParent<IDamageable>();
+            if (damageable == null)
+                damageable = hit.collider.GetComponentInChildren<IDamageable>();
+
+            if (damageable != null)
+            {
+                damageable.TakeDamage(damage);
+            }
+            else
+            {
+                Debug.LogWarning("Hit object does not implement IDamageable: " + hit.collider.name);
+            }
         }
         else
         {
